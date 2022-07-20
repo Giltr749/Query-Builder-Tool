@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-import { unzipFiles } from './unzipMiddleware.js';
 
 import * as fs from 'fs';
 
@@ -9,6 +8,7 @@ const AWS = require('aws-sdk');
 
 export const getS3File = async (req, res, next) => {
     try {
+        res.locals.exists = true;
         const fileKeys = req.query['fileKey'].split(',');
         AWS.config.update({
             accessKeyId: process.env.ACCESSKEYID,
@@ -17,7 +17,7 @@ export const getS3File = async (req, res, next) => {
         });
         const s3 = new AWS.S3();
         const filesList = await listAllFiles();
-        for (let key of fileKeys) {
+        for await (let key of fileKeys) {
             const options = {
                 Bucket: process.env.BUCKET,
                 Key: key
@@ -26,17 +26,26 @@ export const getS3File = async (req, res, next) => {
                 const fileStream = s3.getObject(options).createReadStream();
                 const writeStream = fs.createWriteStream(`./files/downloads/${key.split('/')[key.split('/').length - 1]}`);
 
+                // await new Promise(resolve => {
+                //     fileStream.on('data', chunk => {
+                //         writeStream.write(chunk);
+                //         resolve();
+                //     });
+                // })
                 fileStream.on('data', chunk => {
                     writeStream.write(chunk);
-                });
-                fileStream.on('end', async () => {
-                    writeStream.end();
-                    // unzipFiles();
+                })
+                await new Promise(resolve => {
+                    fileStream.on('close', async () => {
+                        writeStream.end();
+                        resolve();
+                    })
                 })
 
 
             } else {
                 console.log(`${key} does not exist`);
+                res.locals.exists = false;
                 continue
             }
         }
