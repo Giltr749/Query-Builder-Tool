@@ -1,0 +1,80 @@
+import 'dotenv/config'
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+import { unzipFiles } from './unzipMiddleware.js';
+
+import * as fs from 'fs';
+
+const AWS = require('aws-sdk');
+
+export const getS3File = async (req, res, next) => {
+    try {
+        const fileKeys = req.query['fileKey'].split(',');
+        AWS.config.update({
+            accessKeyId: process.env.ACCESSKEYID,
+            secretAccessKey: process.env.SECRETACCESSKEY,
+            region: process.env.REGION
+        });
+        const s3 = new AWS.S3();
+        const filesList = await listAllFiles();
+        for (let key of fileKeys) {
+            const options = {
+                Bucket: process.env.BUCKET,
+                Key: key
+            }
+            if (filesList.includes(key)) {
+                const fileStream = s3.getObject(options).createReadStream();
+                const writeStream = fs.createWriteStream(`./files/downloads/${key.split('/')[key.split('/').length - 1]}`);
+
+                fileStream.on('data', chunk => {
+                    writeStream.write(chunk);
+                });
+                fileStream.on('end', async () => {
+                    writeStream.end();
+                    // unzipFiles();
+                })
+
+
+            } else {
+                console.log(`${key} does not exist`);
+                continue
+            }
+        }
+    } catch (err) {
+        throw (err);
+    }
+    next();
+};
+
+export const listAllFiles = async () => {
+    const s3 = new AWS.S3({
+        region: process.env.REGION,
+        accessKeyId: process.env.ACCESSKEYID,
+        secretAccessKey: process.env.SECRETACCESSKEY
+    });
+    let isTruncated = true;
+    let marker;
+    const elements = [];
+    while (isTruncated) {
+        let params = {
+            Bucket: process.env.BUCKET
+        };
+        if (marker)
+            params.Marker = marker;
+        try {
+            const response = await s3.listObjects(params).promise();
+            response.Contents.forEach(item => {
+                elements.push(item.Key);
+            });
+            isTruncated = response.IsTruncated;
+            if (isTruncated) {
+                marker = response.Contents.slice(-1)[0].Key;
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+    console.log(elements);
+    console.log(elements.length);
+    return elements;
+}
