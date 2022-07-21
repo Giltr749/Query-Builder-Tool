@@ -23,6 +23,7 @@ export const getS3File = async (req, res, next) => {
                 Key: key
             }
             if (filesList.includes(key)) {
+                console.log('downloading', key);
                 const fileStream = s3.getObject(options).createReadStream();
                 const writeStream = fs.createWriteStream(`./files/downloads/${key.split('/')[key.split('/').length - 1]}`);
 
@@ -46,6 +47,7 @@ export const getS3File = async (req, res, next) => {
     } catch (err) {
         throw (err);
     }
+    console.log('going to unzip');
     next();
 };
 

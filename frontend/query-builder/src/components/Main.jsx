@@ -48,9 +48,10 @@ function Main(props) {
 
     const submit = async (rows) => {
         const fileString = rows.join('.zip,') + '.zip';
+        console.log(`http://localhost:8080/download/?fileKey=${fileString}`);
         const response = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
         console.log(response.data);
-        await axios.get('http://localhost:8080/sort');
+        // await axios.get('http://localhost:8080/sort');
     }
 
     return (

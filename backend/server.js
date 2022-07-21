@@ -23,9 +23,9 @@ app.get('/unzip', unzipFiles, (req, res) => {
     res.send('unzipped!');
 })
 
-app.get('/sort', sortCsv, (req, res) => {
-    res.send('done!');
-});
+// app.get('/sort', sortCsv, (req, res) => {
+//     res.send('done!');
+// });
 
 app.get('/test', unzipFiles, (req, res) => {
     res.send('unzipped and sorted!');
