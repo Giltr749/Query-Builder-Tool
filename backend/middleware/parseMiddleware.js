@@ -65,15 +65,12 @@ const filterCsv = async (fileName) => {
 
 export const sortCsv = (req, res, next) => {
     console.log('in sortcsv');
-    fs.readdir('./files/unzipped', (err, files) => {
-        console.log('sortCsv' + files);
-        const pythonProcess = spawn('python', ['middleware/parse.py', files]);
-        pythonProcess.stdout.on('data', data => {
-            console.log(data);
-        })
-        pythonProcess.stderr.on('close', code => {
-            console.log('python process exited with code ' + code);
-            // next();
-        });
+    const pythonProcess = spawn('python3', ['middleware/parse.py']);
+    pythonProcess.stdout.on('data', data => {
+        console.log(data);
+    })
+    pythonProcess.stderr.on('close', code => {
+        console.log('python process exited with code ' + code);
+        next();
     });
 }

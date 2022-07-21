@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.get('/download', getS3File, unzipFiles, (req, res) => {
+app.get('/download', getS3File, unzipFiles, sortCsv, (req, res) => {
     res.locals.exists == true
         ? res.send('downloaded!')
         : res.send('Files do not exist')
@@ -23,9 +23,9 @@ app.get('/unzip', unzipFiles, (req, res) => {
     res.send('unzipped!');
 })
 
-// app.get('/sort', sortCsv, (req, res) => {
-//     res.send('done!');
-// });
+app.get('/sort', sortCsv, (req, res) => {
+    res.send('done!');
+});
 
 app.get('/test', unzipFiles, (req, res) => {
     res.send('unzipped and sorted!');

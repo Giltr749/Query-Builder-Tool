@@ -2,6 +2,12 @@ import * as fs from 'fs';
 import * as unzipper from 'unzipper';
 import { sortCsv } from './parseMiddleware.js';
 
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const spawn = require('child_process').spawn;
+
+
 const unzip = async (files) => {
     const promises = []
     for await (let file of files) {
@@ -28,23 +34,25 @@ const unzip = async (files) => {
 
 export const unzipFiles = (req, res, next) => {
     console.log('in unzipFiles');
-    fs.readdir('./files/downloads', async (err, files) => {
-        if (err) {
-            return console.log(err);
-        } else {
-            await new Promise(resolve => {
-                unzip(files);
-                console.log('done unzipping');
-                resolve();
-            })
-        }
+    // fs.readdir('./files/downloads', async (err, files) => {
+    //     if (err) {
+    //         return console.log(err);
+    //     } else {
+    //         await new Promise(resolve => {
+    //             unzip(files);
+    //             console.log('done unzipping');
+    //             resolve();
+    //         })
+    //     }
+    // })
+
+    const pythonProcess = spawn('python3', ['middleware/unzip.py']);
+    pythonProcess.stdout.on('data', data => {
+        console.log(data);
+    })
+    pythonProcess.stderr.on('close', code => {
+        console.log('python process exited with code ' + code);
+        next();
     })
 
-    next();
 }
-
-const test = () => {
-    console.log(fs.readFileSync(`./files/downloads/4.zip`));
-}
-
-// test();

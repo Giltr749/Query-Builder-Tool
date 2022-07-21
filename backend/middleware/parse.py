@@ -13,13 +13,13 @@ while True:
         maxInt = int(maxInt/10)
 
 # get all file names for csvs
-csv_files = [f for f in os.listdir('./files/unzipped') if f.endswith('.csv')]
+csv_files = [f for f in os.listdir('files/unzipped') if f.endswith('.csv')]
 wifi_list = []
 ble_list = []
 
 for csv_file in csv_files:
     # open csv file
-    with open(f'./files/unzipped/{csv_file}', 'r') as csv_file:
+    with open(f'files/unzipped/{csv_file}', 'r') as csv_file:
         # create csv reader
         csv_reader = csv.reader(csv_file)
         # create list of rows
@@ -32,9 +32,9 @@ for csv_file in csv_files:
     print('Parsed ', csv_file)
 
 # write to new csv file
-with open('./files/parsed/wifi.csv', 'w') as wifi_file:
+with open('files/parsed/wifi.csv', 'w') as wifi_file:
     writer = csv.writer(wifi_file)
     writer.writerows(wifi_list)
-with open('./files/parsed/ble.csv', 'w') as ble_file:
+with open('files/parsed/ble.csv', 'w') as ble_file:
     writer = csv.writer(ble_file)
     writer.writerows(ble_list)

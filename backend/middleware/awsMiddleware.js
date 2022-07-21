@@ -47,7 +47,6 @@ export const getS3File = async (req, res, next) => {
     } catch (err) {
         throw (err);
     }
-    console.log('going to unzip');
     next();
 };
 
