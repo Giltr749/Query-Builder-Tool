@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as unzipper from 'unzipper';
 import { sortCsv } from './parseMiddleware.js';
-// import { sortCsv } from './parseMiddleware.js';
 
 const unzip = async (files) => {
     const promises = []
