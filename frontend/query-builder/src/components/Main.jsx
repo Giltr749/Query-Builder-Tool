@@ -10,20 +10,13 @@ function Main(props) {
     const [sensor, setSensor] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [dateArr, setDatesArr] = useState([]);
 
     const startChange = (e) => {
-        // const dateString = e.target.value.substring(0, 10)
-        // const timeString = e.target.value.substring(11, 13)
-        // const dateTimeString = (dateString + 'T' + timeString + ':00:00.000')
         setStartDate(e.target.value);
 
     }
 
     const endChange = (e) => {
-        // const dateString = e.target.value.substring(0, 10)
-        // const timeString = e.target.value.substring(11, 13)
-        // const dateTimeString = (dateString + 'T' + timeString + ':00:00.000')
         setEndDate(e.target.value);
 
     }
@@ -57,7 +50,7 @@ function Main(props) {
         const fileString = rows.join('.zip,') + '.zip';
         const response = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
         console.log(response.data);
-        // await axios.get('http://localhost:8080/sort')
+        await axios.get('http://localhost:8080/sort');
     }
 
     return (

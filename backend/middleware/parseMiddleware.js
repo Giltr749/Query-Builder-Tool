@@ -6,6 +6,8 @@ import { stringify } from 'csv-stringify/sync';
 
 const indexes = require('../event_indexes.json');
 const csv = require('csv-parser');
+const spawn = require('child_process').spawn;
+
 
 const createDbs = (resultWifi, resultBt) => {
     const wifiKeys = [];
@@ -16,6 +18,7 @@ const createDbs = (resultWifi, resultBt) => {
     for (let i in indexes.bluetooth) {
         btKeys.push(indexes.bluetooth[i]);
     }
+    console.log('creating dbs');
     resultWifi.unshift(wifiKeys);
     resultBt.unshift(btKeys);
     const stringifiedWifi = stringify(resultWifi);
@@ -28,7 +31,7 @@ const createDbs = (resultWifi, resultBt) => {
     })
 }
 
-const filterTest = async (fileName) => {
+const filterCsv = async (fileName) => {
     const resultWifi = [];
     const resultBt = [];
     const fileStream = fs.createReadStream(`./files/unzipped/${fileName}`);
@@ -37,52 +40,40 @@ const filterTest = async (fileName) => {
         .pipe(csv({ headers: false }))
         .on('data', row => {
             if (row['2'] === 'True') {
-                let newRow = [];
-                for (let col in row) {
-                    newRow.push(row[col]);
-                }
-                resultWifi.push(newRow);
+                // let newRow = [];
+                // for (let col in row) {
+                //     newRow.push(row[col]);
+                //     console.log('added row to wifi');
+                console.log(row);
+
+                // }
+                // resultWifi.push(newRow);
             } else {
-                let newRow = [];
-                for (let col in row) {
-                    newRow.push(row[col]);
-                }
-                resultBt.push(newRow);
+                // let newRow = [];
+                // for (let col in row) {
+                //     newRow.push(row[col]);
+                //     console.log('added row to bt');
+                console.log(row);
             }
+            // resultBt.push(newRow);
+            // }
         })
         .on('end', () => {
             createDbs(resultWifi, resultBt);
         })
 }
 
-// const filterCsv = async (fileName) => {
-//     const resultWifi = [];
-//     const resultBt = [];
-//     const fileStream = fs.createReadStream(`./files/unzipped/${fileName}`)
-//     const rl = readline.createInterface({
-//         input: fileStream,
-//         crlfDelay: Infinity
-//     });
-//     for await (let line of rl) {
-//         let row = line.split(',')
-//         row[2] === "True"
-//             ? resultWifi.push(row)
-//             : resultBt.push(row)
-//     }
-
-//     createDbs(resultWifi, resultBt);
-// };
-
 export const sortCsv = (req, res, next) => {
     console.log('in sortcsv');
-    const resultWifi = [];
-    const resultBt = [];
     fs.readdir('./files/unzipped', (err, files) => {
         console.log('sortCsv' + files);
-        files.forEach(async (file) => {
-            await filterTest(file);
+        const pythonProcess = spawn('python', ['middleware/parse.py', files]);
+        pythonProcess.stdout.on('data', data => {
+            console.log(data);
+        })
+        pythonProcess.stderr.on('close', code => {
+            console.log('python process exited with code ' + code);
+            // next();
         });
     });
-    next();
-};
-
+}

@@ -27,6 +27,10 @@ app.get('/sort', sortCsv, (req, res) => {
     res.send('done!');
 });
 
+app.get('/test', unzipFiles, (req, res) => {
+    res.send('unzipped and sorted!');
+});
+
 app.post('/table', createTables, (req, res) => {
     res.send('done!');
 })

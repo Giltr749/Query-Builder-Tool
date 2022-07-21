@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import * as unzipper from 'unzipper';
+import { sortCsv } from './parseMiddleware.js';
 
 const unzip = async (files) => {
     const promises = []
     for await (let file of files) {
-        // console.log(`in ${file}`);
-        
+
         const fileStream = fs.createReadStream(`./files/downloads/${file}`);
         const writeStream = unzipper.Extract({ path: `./files/unzipped` });
 
@@ -13,12 +13,16 @@ const unzip = async (files) => {
             writeStream.write(chunk);
         });
         await new Promise(resolve => {
-            fileStream.on('end', () => {
+            fileStream.on('close', () => {
                 writeStream.end();
                 resolve();
             })
         })
-        await new Promise(resolve => fileStream.on('finish', resolve()));
+        await new Promise(resolve => fileStream.on('close', () => {
+            // sortCsv();
+            resolve();
+        }))
+
     }
 };
 

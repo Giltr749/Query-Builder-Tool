@@ -26,12 +26,6 @@ export const getS3File = async (req, res, next) => {
                 const fileStream = s3.getObject(options).createReadStream();
                 const writeStream = fs.createWriteStream(`./files/downloads/${key.split('/')[key.split('/').length - 1]}`);
 
-                // await new Promise(resolve => {
-                //     fileStream.on('data', chunk => {
-                //         writeStream.write(chunk);
-                //         resolve();
-                //     });
-                // })
                 fileStream.on('data', chunk => {
                     writeStream.write(chunk);
                 })
