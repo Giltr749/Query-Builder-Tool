@@ -55,22 +55,26 @@ function Main(props) {
 
     const submit = async (rows) => {
         const fileString = rows.join('.zip,') + '.zip';
-        console.log(`http://localhost:8080/download/?fileKey=${fileString}`);
+        console.log('downloading...');
         const responseGet = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
         console.log(responseGet.data);
         if (responseGet.data === 'downloaded!') {
             console.log('creating table');
             const responseTable = await axios.get(`http://localhost:8080/table`);
             console.log(responseTable.data);
-            console.log('getting data');
-            const responseQuery = await axios.post(`http://localhost:8080/data`, {
-                queries: query
+
+            if (responseTable.data === 'done!') {
+                console.log('getting data');
+                const responseQuery = await axios.post(`http://localhost:8080/data`, {
+                    queries: query
                 });
-            console.log(responseQuery.data);
+                console.log(responseQuery.data);
+            }
         }
-        else{
-            console.log('ERROR');
-        }
+        // }
+        // else{
+        //     console.log('ERROR');
+        // }
     }
 
     const clickAdd = () => {

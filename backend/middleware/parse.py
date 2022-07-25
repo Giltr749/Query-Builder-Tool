@@ -4,17 +4,9 @@ import sys
 import json
 import logging
 
-
-logging.basicConfig(filename='files/log.log', encoding='utf-8',
-                    level=logging.DEBUG)
-
 maxInt = sys.maxsize
 
-indexes = sys.argv[1]
-
 # read json file
-
-
 def read_json(file_name):
     with open(file_name) as json_file:
         data = json.load(json_file)
@@ -28,7 +20,7 @@ def read_json(file_name):
             elif k == 'bluetooth':
                 for k2, v2 in v.items():
                     l2.append(v2)
-
+                    
         return l1, l2
 
 

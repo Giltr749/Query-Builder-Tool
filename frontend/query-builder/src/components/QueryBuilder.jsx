@@ -94,7 +94,8 @@ export default class QueryBuilder extends Component {
         // Tip: for better performance you can apply `throttle` - see `examples/demo`
         this.setState({ tree: immutableTree, config: config });
         const sqlQuery = JSON.stringify(QbUtils.sqlFormat(immutableTree, config));
-        this.props.setSubQuery(sqlQuery);
+        console.log(sqlQuery.replaceAll('"', ''));
+        this.props.setSubQuery(sqlQuery.replaceAll('"', ''));
     }
 
     changeType = (e) => {
