@@ -19,12 +19,11 @@ dbBt.on('error', err => {
 });
 
 export const createTables = async (req, res, next) => {
-    fs.readdir('./files/parsed', (err, files) => {
+    fs.readdir('./files/parsed', async (err, files) => {
         if (err) throw err;
         else {
-            req.body.wifi
-                ? createTable(files[1], dbWifi)
-                : createTable(files[0], dbBt);
+            await createTable(files[0], dbBt);
+            await createTable(files[1], dbWifi);
         }
     });
     next();
@@ -51,14 +50,14 @@ const createTable = async (file, db) => {
             });
     });
 
-    await new Promise((resolve, reject) => {
-        db.run(`DROP TABLE IF EXISTS ${tblnm}`,
-            [],
-            err => {
-                if (err) reject(err);
-                else resolve();
-            })
-    });
+    // await new Promise((resolve, reject) => {
+    //     db.run(`DROP TABLE IF EXISTS ${tblnm}`,
+    //         [],
+    //         err => {
+    //             if (err) reject(err);
+    //             else resolve();
+    //         })
+    // });
 
     const fixFieldName = (nm) => { return nm.replace(/["]/g, '_'); }
 
@@ -112,19 +111,79 @@ const createTable = async (file, db) => {
     db.close();
 };
 
+// const getWifiRows = async (queries) => {
+//     const results = []
+//     for (let query of queries) {
+//         dbWifi.all(query, (err, rows) => {
+//             if (err) {
+//                 console.log(err);
+//                 // reject(err);
+//                 // res.send(err);
+//             }
+//             else {
+//                 results.push(rows);
+//                 // resolve(rows);
+//             }
+//         });
+//     }
+//     return results;
+// }
+// const getBtRows = async (queries) => {
+//     const result = await new Promise((resolve, reject) => {
+//         const results = [];
+//         for (let query of queries) {
+//             console.log(query);
+//             dbBt.all(`SELECT * FROM ${tblnm} WHERE ${query}`, (err, rows) => {
+//                 if (err) {
+//                     console.log(err);
+//                     reject(err);
+//                 }
+//                 else {
+//                     results.push(rows);
+//                 }
+//             });
+//         }
+//         resolve(results);
+//     });
+//     console.log(result);
+//     return result;
+// }
+
 export const getData = async (req, res, next) => {
     await new Promise((resolve, reject) => {
-        db.all(req.body.query, (err, rows) => {
-            if (err) {
-                console.log(err);
-                reject(err);
-                res.send(err);
+        const queries = req.body.queries;
+        const results = []
+        // queries.type === 'wifi'
+        //     ? results.push(getWifiRows(queries.queries))
+        //     : results.push(getBtRows(queries.queries))
+        for (let query of queries.queries) {
+            if (queries.type === 'wifi') {
+                dbWifi.all(`SELECT * FROM ${tblnm} WHERE ${query}`, (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                        res.send(err);
+                    }
+                    else {
+                        results.push(rows);
+                        resolve(rows);
+                    }
+                })
+            } else {
+                dbBt.all(`SELECT * FROM ${tblnm} WHERE ${query}`, (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                        res.send(err);
+                    }
+                    else {
+                        results.push(rows);
+                        resolve(rows);
+                    }
+                })
             }
-            else {
-                res.locals.result = rows;
-                resolve(rows);
-            }
-        })
+        }
+        res.locals.result = results;
     });
     next();
-};
+}

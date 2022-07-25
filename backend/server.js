@@ -27,11 +27,11 @@ app.get('/sort', sortCsv, (req, res) => {
     res.send('done!');
 });
 
-app.get('/test', unzipFiles, (req, res) => {
-    res.send('unzipped and sorted!');
+app.post('/test', (req, res) => {
+    res.send(req.body);
 });
 
-app.post('/table', createTables, (req, res) => {
+app.get('/table', createTables, (req, res) => {
     res.send('done!');
 })
 

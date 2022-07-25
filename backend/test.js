@@ -1,22 +1,20 @@
-import * as fs from 'fs';
-
+import 'dotenv/config';
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
-const express = require('express')
-const { spawn } = require('child_process');
-const app = express()
-const port = 3000
-app.get('/', (req, res) => {
+const fs = require('fs');
 
-    const pythonProcess = spawn('python3', ['middleware/parse.py']);
-    pythonProcess.stdout.on('data', data => {
-        // console.log(data);
-    })
-        .on('close', code => {
-            console.log('done', code);
-        })
+const jsonFile = require('./event_indexes.json');
 
-})
-app.listen(port, () => console.log(`Example app listening on port 
-${port}!`))
+const asdf = process.env.EVENTINDEXES;
+
+const dsa = JSON.parse(asdf);
+
+// console.log(dsa);
+
+for (let i in dsa.wifi) {
+    fs.writeFile('./event_indexes.json', asdf)
+}
+for (let i in dsa.bluetooth) {
+    jsonFile.writeFile(i);
+}

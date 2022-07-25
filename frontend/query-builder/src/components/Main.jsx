@@ -5,11 +5,17 @@ import axios from 'axios'
 
 function Main(props) {
 
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState({
+        queries: [],
+        type: 'wifi'
+    });
+    const [subQuery, setSubQuery] = useState('');
     const [cluster, setCluster] = useState('');
     const [sensor, setSensor] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [wifi, setWifi] = useState('wifi');
+
 
     const startChange = (e) => {
         setStartDate(e.target.value);
@@ -43,15 +49,36 @@ function Main(props) {
                 .replaceAll('/0', '/')
             rows[i] = `${cluster}/${sensor}/${rows[i]}`
         }
+        console.log(query);
         await submit(rows)
     }
 
     const submit = async (rows) => {
         const fileString = rows.join('.zip,') + '.zip';
         console.log(`http://localhost:8080/download/?fileKey=${fileString}`);
-        const response = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
-        console.log(response.data);
-        // await axios.get('http://localhost:8080/sort');
+        const responseGet = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
+        console.log(responseGet.data);
+        if (responseGet.data === 'downloaded!') {
+            console.log('creating table');
+            const responseTable = await axios.get(`http://localhost:8080/table`);
+            console.log(responseTable.data);
+            console.log('getting data');
+            const responseQuery = await axios.post(`http://localhost:8080/data`, {
+                queries: query
+                });
+            console.log(responseQuery.data);
+        }
+        else{
+            console.log('ERROR');
+        }
+    }
+
+    const clickAdd = () => {
+        if (subQuery.length != 0) {
+            const tempQuery = structuredClone(query);
+            tempQuery.queries.push(subQuery);
+            setQuery(tempQuery);
+        }
     }
 
     return (
@@ -64,8 +91,14 @@ function Main(props) {
             <input type='text' onChange={clusterChange} />
             <label>Sensor ID</label>
             <input type='text' onChange={sensorChange} />
-            <QueryBuilder query={query} setQuery={setQuery} />
+            <QueryBuilder query={query} setQuery={setQuery} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} />
+            <button onClick={clickAdd}>Add</button>
             <button onClick={clickSubmit}>Submit</button>
+            {
+                query.queries.map((item, index) => (
+                    <div key={index}>{item}</div>
+                ))
+            }
         </div>
     );
 }

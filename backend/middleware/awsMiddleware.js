@@ -7,6 +7,11 @@ import * as fs from 'fs';
 const AWS = require('aws-sdk');
 
 export const getS3File = async (req, res, next) => {
+    console.log(req.query);
+    if(req.query['fileKey'] === '.zip') {
+        res.send('did not receive file key');
+    }
+
     try {
         res.locals.exists = true;
         const fileKeys = req.query['fileKey'].split(',');
