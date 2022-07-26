@@ -71,3 +71,30 @@ export const insertData = async (req, res, next) => {
     
     next();
 }
+
+export const getData = async (req, res, next) => {
+    res.locals.result = [];
+    for (let queryElement of req.body.queries) {
+        let query = '';
+        if (req.body.queries.type === 'wifi') {
+            query = `SELECT * FROM wifiEvents WHERE ${queryElement}`;
+        }
+        else {
+            query = `SELECT * FROM btEvents WHERE ${queryElement}`;
+        }
+            await new Promise((resolve, reject) => {
+                db.all(query, (err, rows) => {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                        res.send(err);
+                    }
+                    else {
+                        res.locals.result.push(rows);
+                        resolve(rows);
+                    }
+                })
+            });
+    }
+    next();
+};

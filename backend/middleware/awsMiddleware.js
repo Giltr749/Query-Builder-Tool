@@ -30,7 +30,7 @@ export const getS3File = async (req, res, next) => {
             if (filesList.includes(key)) {
                 console.log('downloading', key);
                 const fileStream = s3.getObject(options).createReadStream();
-                const writeStream = fs.createWriteStream(`./files/downloads/${key.split('/')[key.split('/').length - 1]}`);
+                const writeStream = fs.createWriteStream(`./files/downloads/${key.replaceAll('/', '_')}`);
 
                 fileStream.on('data', chunk => {
                     writeStream.write(chunk);

@@ -4,7 +4,7 @@ import { getS3File, listAllFiles } from './middleware/awsMiddleware.js';
 import { unzipFiles } from './middleware/unzipMiddleware.js';
 import { sortCsv } from './middleware/parseMiddleware.js';
 // import { createTables, getData } from './middleware/databaseMiddleware.js';
-import { createTables, insertData } from './middleware/newDatabaseMiddleware.js';
+import { createTables, insertData, getData } from './middleware/newDatabaseMiddleware.js';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
@@ -32,9 +32,9 @@ app.get('/table', insertData, (req, res) => {
     res.send('done!');
 })
 
-// app.post('/data', getData, (req, res) => {
-//     res.send(res.locals.result);
-// })
+app.post('/data', getData, (req, res) => {
+    res.send(res.locals.result);
+})
 
 app.get('/list', (req, res) => {
     res.locals.result = listAllFiles();

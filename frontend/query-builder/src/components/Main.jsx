@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import QueryBuilder from './QueryBuilder.jsx'
+import Results from './Results.jsx'
 import axios from 'axios'
 
 
@@ -15,6 +16,8 @@ function Main(props) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [wifi, setWifi] = useState('wifi');
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
 
 
     const startChange = (e) => {
@@ -36,6 +39,7 @@ function Main(props) {
     }
 
     const clickSubmit = async () => {
+        setLoading(true);
         const start = new Date(startDate).getTime();
         const end = new Date(endDate).getTime();
         const numOfRows = (end - start) / 3600000;
@@ -51,6 +55,7 @@ function Main(props) {
         }
         console.log(query);
         await submit(rows)
+        setLoading(false);
     }
 
     const submit = async (rows) => {
@@ -58,6 +63,11 @@ function Main(props) {
         console.log('downloading...');
         const responseGet = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
         console.log(responseGet.data);
+        if (responseGet.data === 'downloaded!') {
+            const responseQuery = await axios.post('http://localhost:8080/data', query);
+            console.log(responseQuery.data);
+            setResults([...results, ...responseQuery.data[0]])        
+        }
     }
 
     const clickAdd = () => {
@@ -86,6 +96,7 @@ function Main(props) {
                     <div key={index}>{item}</div>
                 ))
             }
+            <Results results={results} loading={loading}/>
         </div>
     );
 }
