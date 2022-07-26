@@ -63,13 +63,13 @@ function Main(props) {
             const responseTable = await axios.get(`http://localhost:8080/table`);
             console.log(responseTable.data);
 
-            if (responseTable.data === 'done!') {
-                console.log('getting data');
-                const responseQuery = await axios.post(`http://localhost:8080/data`, {
-                    queries: query
-                });
-                console.log(responseQuery.data);
-            }
+            // if (responseTable.data === 'done!') {
+            //     console.log('getting data');
+            //     const responseQuery = await axios.post(`http://localhost:8080/data`, {
+            //         queries: query
+            //     });
+            //     console.log(responseQuery.data);
+            // }
         }
         // }
         // else{
