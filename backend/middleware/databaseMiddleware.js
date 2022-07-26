@@ -111,8 +111,12 @@ const createTable = async (file, db) => {
 
 export const getData = async (req, res, next) => {
     res.locals.result = [];
-    for (let queryElement of req.body.queries) {
-        console.log(typeof req.body.queries);
+    console.log(req.body.queries);
+    console.log(typeof req.body.queries);
+    // const {query} = req.body.query;
+    // console.log(query);
+    // console.log(typeof query);
+    for (let queryElement of req.body.queries.queries) {
         if (req.body.queries.type === 'wifi') {
             await new Promise((resolve, reject) => {
                 const query = `SELECT * FROM ${tblnm} WHERE ${queryElement}`;

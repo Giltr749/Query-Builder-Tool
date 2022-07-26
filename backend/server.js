@@ -3,7 +3,8 @@ import express from 'express';
 import { getS3File, listAllFiles } from './middleware/awsMiddleware.js';
 import { unzipFiles } from './middleware/unzipMiddleware.js';
 import { sortCsv } from './middleware/parseMiddleware.js';
-import { createTables, getData } from './middleware/databaseMiddleware.js';
+// import { createTables, getData } from './middleware/databaseMiddleware.js';
+import { createTables, insertData } from './middleware/newDatabaseMiddleware.js';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
@@ -13,7 +14,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.get('/download', getS3File, unzipFiles, sortCsv, (req, res) => {
+app.get('/download',createTables, getS3File, unzipFiles, sortCsv, insertData, (req, res) => {
     res.locals.exists == true
         ? res.send('downloaded!')
         : res.send('Files do not exist')
@@ -27,17 +28,13 @@ app.get('/sort', sortCsv, (req, res) => {
     res.send('done!');
 });
 
-app.post('/test', (req, res) => {
-    res.send(req.body);
-});
-
-app.get('/table', createTables, (req, res) => {
+app.get('/table', insertData, (req, res) => {
     res.send('done!');
 })
 
-app.post('/data', getData, (req, res) => {
-    res.send(res.locals.result);
-})
+// app.post('/data', getData, (req, res) => {
+//     res.send(res.locals.result);
+// })
 
 app.get('/list', (req, res) => {
     res.locals.result = listAllFiles();
