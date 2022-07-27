@@ -1,11 +1,9 @@
-import parse from 'csv-parser';
-import fs from 'fs';
 import sqlite3 from 'sqlite3';
-// import csvHeaders from 'csv-headers';
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const indexes = require('../event_indexes.json');
 const spawn = require('child_process').spawn;
+
 
 const wifiHeaders = Object.keys(indexes.wifi).map(key => {
     return indexes.wifi[key]
@@ -61,40 +59,67 @@ const createTable = async () => {
 }
 
 export const insertData = async (req, res, next) => {
+    console.log('inserting data to database');
     const pythonProcess = spawn('python3', ['middleware/insert.py']);
     pythonProcess.stdout.on('data', data => {
-        console.log(data);
+        console.log(data.toString());
     });
     pythonProcess.stderr.on('close', code => {
         console.log('python process exited with code ' + code);
+        next();
     });
-    
-    next();
+
+}
+
+export const getDataPython = async (req, res, next) => {
+    console.log('getting data from database');
+    const concatQuery = req.body.queries.join(' OR ')
+    let query = '';
+    let headers = '';
+    if (req.body.queries.type === 'wifi') {
+        query = `SELECT * FROM wifiEvents WHERE ${concatQuery}`;
+        headers = Object.values(indexes['wifi']).join(',');
+    }
+    else {
+        query = `SELECT * FROM btEvents WHERE ${concatQuery}`;
+        headers = Object.values(indexes['bluetooth']).join(',');
+    }
+    console.log('query:', query);
+    const pythonProcess = spawn('python3', ['middleware/getData.py', query, headers]);
+    console.log('creating report');
+    pythonProcess.stdout.on('data', data => {
+        console.log(data.toString());
+    })
+    pythonProcess.stderr.on('close', code => {
+        console.log('python process exited with code ' + code);
+        next();
+    });
 }
 
 export const getData = async (req, res, next) => {
+    console.log('getting data from database');
     res.locals.result = [];
-    for (let queryElement of req.body.queries) {
-        let query = '';
-        if (req.body.queries.type === 'wifi') {
-            query = `SELECT * FROM wifiEvents WHERE ${queryElement}`;
-        }
-        else {
-            query = `SELECT * FROM btEvents WHERE ${queryElement}`;
-        }
-            await new Promise((resolve, reject) => {
-                db.all(query, (err, rows) => {
-                    if (err) {
-                        console.log(err);
-                        reject(err);
-                        res.send(err);
-                    }
-                    else {
-                        res.locals.result.push(rows);
-                        resolve(rows);
-                    }
-                })
-            });
+    const concatQuery = req.body.queries.join(' OR ')
+    let query = '';
+    if (req.body.queries.type === 'wifi') {
+        query = `SELECT * FROM wifiEvents WHERE ${concatQuery}`;
     }
+    else {
+        query = `SELECT * FROM btEvents WHERE ${concatQuery}`;
+    }
+    await new Promise((resolve, reject) => {
+        db.all(query, (err, rows) => {
+            if (err) {
+                console.log(err);
+                reject(err);
+                res.send(err);
+            }
+            else {
+                res.locals.result = rows;
+                resolve(rows);
+            }
+        })
+    });
     next();
+
 };

@@ -8,7 +8,7 @@ const AWS = require('aws-sdk');
 
 export const getS3File = async (req, res, next) => {
     console.log(req.query);
-    if(req.query['fileKey'] === '.zip') {
+    if (req.query['fileKey'] === '.zip') {
         res.send('did not receive file key');
     }
 
@@ -23,31 +23,35 @@ export const getS3File = async (req, res, next) => {
         const s3 = new AWS.S3();
         const filesList = await listAllFiles();
         for await (let key of fileKeys) {
-            const options = {
-                Bucket: process.env.BUCKET,
-                Key: key
-            }
-            if (filesList.includes(key)) {
-                console.log('downloading', key);
-                const fileStream = s3.getObject(options).createReadStream();
-                const writeStream = fs.createWriteStream(`./files/downloads/${key.replaceAll('/', '_')}`);
+            // const downloaded = fs.readdirSync('./files/downloads')
+            // if (downloaded.includes(key)) {
+                const options = {
+                    Bucket: process.env.BUCKET,
+                    Key: key
+                }
+                if (filesList.includes(key)) {
+                    console.log('downloading', key);
+                    const fileStream = s3.getObject(options).createReadStream();
+                    const writeStream = fs.createWriteStream(`./files/downloads/${key.replaceAll('/', '_')}`);
 
-                fileStream.on('data', chunk => {
-                    writeStream.write(chunk);
-                })
-                await new Promise(resolve => {
-                    fileStream.on('close', async () => {
-                        writeStream.end();
-                        resolve();
+                    fileStream.on('data', chunk => {
+                        writeStream.write(chunk);
                     })
-                })
+                    await new Promise(resolve => {
+                        fileStream.on('close', async () => {
+                            writeStream.end();
+                            resolve();
+                        })
+                    })
 
 
-            } else {
-                console.log(`${key} does not exist`);
-                res.locals.exists = false;
-                continue
-            }
+                } else {
+                    console.log(`${key} does not exist`);
+                    res.locals.exists = false;
+                    continue
+                }
+            // }
+
         }
     } catch (err) {
         throw (err);

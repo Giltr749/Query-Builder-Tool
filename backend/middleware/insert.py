@@ -1,6 +1,5 @@
 import sqlite3 as sq
 import pandas as pd
-import sys
 
 connection = sq.connect('files/databases/db.sqlite3')
 

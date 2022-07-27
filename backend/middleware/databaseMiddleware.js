@@ -50,15 +50,6 @@ const createTable = async (file, db) => {
             });
     });
 
-    // await new Promise((resolve, reject) => {
-    //     db.run(`DROP TABLE IF EXISTS ${tblnm}`,
-    //         [],
-    //         err => {
-    //             if (err) reject(err);
-    //             else resolve();
-    //         })
-    // });
-
     const fixFieldName = (nm) => { return nm.replace(/["]/g, '_'); }
 
     const fields = headers.map(hdr => {

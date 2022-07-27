@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import QueryBuilder from './QueryBuilder.jsx'
-import Results from './Results.jsx'
-import axios from 'axios'
+import QueryBuilder from './QueryBuilder.jsx';
+import Results from './Results.jsx';
+import axios from 'axios';
+import FileDownload from 'js-file-download';
 
 
 function Main(props) {
@@ -61,12 +62,14 @@ function Main(props) {
     const submit = async (rows) => {
         const fileString = rows.join('.zip,') + '.zip';
         console.log('downloading...');
-        const responseGet = await axios.get(`http://localhost:8080/download/?fileKey=${fileString}`);
-        console.log(responseGet.data);
-        if (responseGet.data === 'downloaded!') {
-            const responseQuery = await axios.post('http://localhost:8080/data', query);
-            console.log(responseQuery.data);
-            setResults([...results, ...responseQuery.data[0]])        
+        const response = await axios({
+            method: 'post',
+            url: `http://localhost:8080/download/?fileKey=${fileString}`,
+            data: query,
+            responseType: 'blob'});
+        // console.log(responseGet.data);
+        if (response.data) {
+            FileDownload(response.data, 'report.csv');
         }
     }
 
@@ -76,6 +79,16 @@ function Main(props) {
             tempQuery.queries.push(subQuery);
             setQuery(tempQuery);
         }
+    }
+
+    const testDownload = async () => {
+        console.log('in test');
+        const response = await axios.get('http://localhost:8080/endpoint', {
+            responseType: 'blob'
+        });
+        console.log(response);
+        FileDownload(response.data, 'report.csv');
+
     }
 
     return (
@@ -91,12 +104,13 @@ function Main(props) {
             <QueryBuilder query={query} setQuery={setQuery} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} />
             <button onClick={clickAdd}>Add</button>
             <button onClick={clickSubmit}>Submit</button>
+            <button onClick={testDownload}>Test</button>
             {
                 query.queries.map((item, index) => (
                     <div key={index}>{item}</div>
                 ))
             }
-            <Results results={results} loading={loading}/>
+            <Results results={results} loading={loading} />
         </div>
     );
 }
