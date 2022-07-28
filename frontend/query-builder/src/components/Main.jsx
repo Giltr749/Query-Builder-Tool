@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import QueryBuilder from './QueryBuilder.jsx';
-import Results from './Results.jsx';
 import axios from 'axios';
 import FileDownload from 'js-file-download';
+import '../styles/Main.css';
+import FirstSearch from './FirstSearch.jsx';
+import SecondSearch from './SecondSearch.jsx';
 
 
 function Main(props) {
@@ -19,25 +21,7 @@ function Main(props) {
     const [wifi, setWifi] = useState('wifi');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
-
-
-    const startChange = (e) => {
-        setStartDate(e.target.value);
-
-    }
-
-    const endChange = (e) => {
-        setEndDate(e.target.value);
-
-    }
-
-    const clusterChange = (e) => {
-        setCluster(e.target.value);
-    }
-
-    const sensorChange = (e) => {
-        setSensor(e.target.value);
-    }
+    const [second, setSecond] = useState(false);
 
     const clickSubmit = async () => {
         setLoading(true);
@@ -66,8 +50,8 @@ function Main(props) {
             method: 'post',
             url: `http://localhost:8080/download/?fileKey=${fileString}`,
             data: query,
-            responseType: 'blob'});
-        // console.log(responseGet.data);
+            responseType: 'blob'
+        });
         if (response.data) {
             FileDownload(response.data, 'report.csv');
         }
@@ -81,36 +65,13 @@ function Main(props) {
         }
     }
 
-    const testDownload = async () => {
-        console.log('in test');
-        const response = await axios.get('http://localhost:8080/endpoint', {
-            responseType: 'blob'
-        });
-        console.log(response);
-        FileDownload(response.data, 'report.csv');
-
-    }
-
     return (
-        <div>
-            <label>Start Date</label>
-            <input type='datetime-local' onChange={startChange} />
-            <label>End Date</label>
-            <input type='datetime-local' onChange={endChange} />
-            <label>Cluster</label>
-            <input type='text' onChange={clusterChange} />
-            <label>Sensor ID</label>
-            <input type='text' onChange={sensorChange} />
-            <QueryBuilder query={query} setQuery={setQuery} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} />
-            <button onClick={clickAdd}>Add</button>
-            <button onClick={clickSubmit}>Submit</button>
-            <button onClick={testDownload}>Test</button>
+        <div className='main-div'>
+            <FirstSearch startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} cluster={cluster} setCluster={setCluster} sensor={sensor} setSensor={setSensor} results={results} setResults={setResults} setSecond={setSecond}/>
             {
-                query.queries.map((item, index) => (
-                    <div key={index}>{item}</div>
-                ))
+                second > 0 &&
+                <SecondSearch query={query} setQuery={setQuery} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} clickAdd={clickAdd} clickSubmit={clickSubmit}/>
             }
-            <Results results={results} loading={loading} />
         </div>
     );
 }

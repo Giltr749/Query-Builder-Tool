@@ -34,18 +34,6 @@ const unzip = async (files) => {
 
 export const unzipFiles = (req, res, next) => {
     console.log('in unzipFiles');
-    // fs.readdir('./files/downloads', async (err, files) => {
-    //     if (err) {
-    //         return console.log(err);
-    //     } else {
-    //         await new Promise(resolve => {
-    //             unzip(files);
-    //             console.log('done unzipping');
-    //             resolve();
-    //         })
-    //     }
-    // })
-
     const pythonProcess = spawn('python3', ['middleware/unzip.py']);
     pythonProcess.stdout.on('data', data => {
         console.log(data.toString());
@@ -54,5 +42,6 @@ export const unzipFiles = (req, res, next) => {
         console.log('python process exited with code ' + code);
         next();
     })
-
 }
+
+

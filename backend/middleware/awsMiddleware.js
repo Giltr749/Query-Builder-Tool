@@ -22,9 +22,10 @@ export const getS3File = async (req, res, next) => {
         });
         const s3 = new AWS.S3();
         const filesList = await listAllFiles();
+        const downloaded = fs.readdirSync('./files/downloads')
         for await (let key of fileKeys) {
-            // const downloaded = fs.readdirSync('./files/downloads')
-            // if (downloaded.includes(key)) {
+            if (!downloaded.includes(key.replaceAll('/', '_'))) {
+                console.log('included');
                 const options = {
                     Bucket: process.env.BUCKET,
                     Key: key
@@ -43,14 +44,12 @@ export const getS3File = async (req, res, next) => {
                             resolve();
                         })
                     })
-
-
                 } else {
                     console.log(`${key} does not exist`);
                     res.locals.exists = false;
                     continue
                 }
-            // }
+            }
 
         }
     } catch (err) {
@@ -59,7 +58,61 @@ export const getS3File = async (req, res, next) => {
     next();
 };
 
-export const listAllFiles = async () => {
+export const getCluster = async (req, res, next) => {
+    try {
+        const files = req.body.files;
+        const cluster = req.body.cluster;
+        console.log(cluster);
+        console.log(files);
+        AWS.config.update({
+            accessKeyId: process.env.ACCESSKEYID,
+            secretAccessKey: process.env.SECRETACCESSKEY,
+            region: process.env.REGION
+        });
+        const s3 = new AWS.S3();
+        const filesList = await listAllFiles(req.body.cluster);
+        console.log(filesList);
+        const downloaded = fs.readdirSync('./files/downloads');
+        const re = `${new RegExp('.')}`
+        const toDownload = []
+        for (let file of filesList) {
+            for (let key of files) {
+                if (file.endsWith(`${key}.zip`)) {
+                    toDownload.push(file);
+                }
+            }
+        }
+        console.log(toDownload);
+        for await (let file of toDownload) {
+            if (!downloaded.includes(file.replaceAll('/', '_'))) {
+                const options = {
+                    Bucket: process.env.BUCKET,
+                    Key: file
+                }
+                    console.log('downloading', file);
+                    const fileStream = s3.getObject(options).createReadStream();
+                    const writeStream = fs.createWriteStream(`./files/downloads/${file.replaceAll('/', '_')}`);
+
+                    fileStream.on('data', chunk => {
+                        writeStream.write(chunk);
+                    })
+                    await new Promise(resolve => {
+                        fileStream.on('close', async () => {
+                            writeStream.end();
+                            resolve();
+                        })
+                    })  
+            }
+        }
+
+    }
+    catch (err) {
+        throw (err);
+    }
+    next();
+}
+
+export const listAllFiles = async (prefix = null) => {
     const s3 = new AWS.S3({
         region: process.env.REGION,
         accessKeyId: process.env.ACCESSKEYID,
@@ -74,6 +127,8 @@ export const listAllFiles = async () => {
         };
         if (marker)
             params.Marker = marker;
+        if (prefix)
+            params.Prefix = prefix;
         try {
             const response = await s3.listObjects(params).promise();
             response.Contents.forEach(item => {
@@ -87,7 +142,7 @@ export const listAllFiles = async () => {
             throw err;
         }
     }
-    console.log(elements);
-    console.log(elements.length);
+    // console.log(elements);
+    console.log(elements.length, ' files found');
     return elements;
 }

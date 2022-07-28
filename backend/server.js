@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
-import { getS3File, listAllFiles } from './middleware/awsMiddleware.js';
+import { getS3File, getCluster } from './middleware/awsMiddleware.js';
 import { unzipFiles } from './middleware/unzipMiddleware.js';
-import { sortCsv } from './middleware/parseMiddleware.js';
+import { countRows, sortCsv } from './middleware/parseMiddleware.js';
 import { createTables, insertData, getData, getDataPython } from './middleware/newDatabaseMiddleware.js';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -14,27 +14,23 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.post('/download',createTables, getS3File, unzipFiles, sortCsv, insertData, getDataPython, (req, res) => {
+app.post('/download', createTables, getS3File, unzipFiles, sortCsv, insertData, getDataPython, (req, res) => {
     res.locals.exists == true
-        ?  res.download(`./files/toSend/report.csv`)
+        ? res.download(`./files/toSend/report.csv`)
         : res.send('Files do not exist')
 })
 
-app.post('/data', getDataPython, (req, res) => {
-    fs.readdir('./files/toSend', (err, files) => {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        }
-        else {
-            if (files.length > 0) {
-                res.download(`./files/toSend/${files[0]}`);
-            }
-            else {
-                res.send('problem creating report')
-            }
-        }
+app.get('/rows', getS3File, unzipFiles, countRows, (req, res) => {
+    const rows = res.locals.rows;
+    console.log(rows, ' rows');
+    res.send({
+        "rows": rows
     })
+})
+
+app.post('/cluster', getCluster, (req, res) => {
+    const results = res.locals.results
+    res.send({results});
 })
 
 app.listen(process.env.PORT, () => {

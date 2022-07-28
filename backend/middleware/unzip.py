@@ -8,7 +8,7 @@ def unzip_files(directory):
     for file in os.listdir(directory):
         if file.endswith(".zip"):
             zip_ref = zipfile.ZipFile(directory + file, 'r')
-            zip_ref.extractall(directory)
+            zip_ref.extractall('files/unzipped/')
             zip_ref.close()
             print(f'Unzipped {file}')
 
@@ -22,7 +22,7 @@ def move_files(directory):
 
 def main():
     unzip_files('files/downloads/')
-    move_files('files/downloads/')
+    # move_files('files/downloads/')
 
 
 if __name__ == '__main__':
