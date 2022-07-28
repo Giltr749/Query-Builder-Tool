@@ -36,13 +36,8 @@ export default class QueryBuilder extends Component {
 
     render = () => (
         <div>
-            <select onChange={this.changeType}>
-                <option value="wifi">Wifi</option>
-                <option value="bt">Bluetooth</option>
-                <option value="proper">Wifi and BT</option>
-            </select>
             {
-                this.state.configType === 'wifi' &&
+                this.props.type === 'wifi' &&
                 <Query
                     {...wConfig}
                     value={this.state.tree}
@@ -51,7 +46,7 @@ export default class QueryBuilder extends Component {
                 />
             }
             {
-                this.state.configType === 'bt' &&
+                this.props.type === 'ble' &&
                 <Query
                     {...bConfig}
                     value={this.state.tree}
@@ -59,16 +54,6 @@ export default class QueryBuilder extends Component {
                     renderBuilder={this.renderBuilder}
                 />
             }
-            {
-                this.state.configType === 'proper' &&
-                <Query
-                    {...pConfig}
-                    value={this.state.tree}
-                    onChange={this.onChange}
-                    renderBuilder={this.renderBuilder}
-                />
-            }
-
             {this.renderResult(this.state)}
         </div>
     )
@@ -96,24 +81,5 @@ export default class QueryBuilder extends Component {
         const sqlQuery = JSON.stringify(QbUtils.sqlFormat(immutableTree, config));
         console.log(sqlQuery.replaceAll('"', ''));
         this.props.setSubQuery(sqlQuery.replaceAll('"', ''));
-    }
-
-    changeType = (e) => {
-        if (e.target.value === 'wifi') {
-            this.props.setWifi(e.target.value);
-            this.setState({ config: wConfig, configType: this.props.wifi });
-
-        }
-        else if (e.target.value === 'bt') {
-            this.props.setWifi(e.target.value);
-            this.setState({ config: bConfig, configType: this.props.wifi });
-        }
-        else if (e.target.value === 'proper') {
-            this.props.setWifi(e.target.value);
-            this.setState({ config: pConfig, configType: this.props.wifi });
-        }
-        const tempQuery = structuredClone(this.props.query)
-        tempQuery.type = e.target.value
-        this.props.setQuery(tempQuery);
     }
 }

@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-app.post('/download', createTables, getS3File, unzipFiles, sortCsv, insertData, getDataPython, (req, res) => {
+app.post('/sensor', createTables, getS3File, unzipFiles, sortCsv, insertData, getDataPython, (req, res) => {
     res.locals.exists == true
         ? res.download(`./files/toSend/report.csv`)
         : res.send('Files do not exist')
@@ -28,7 +28,7 @@ app.get('/rows', getS3File, unzipFiles, countRows, (req, res) => {
     })
 })
 
-app.post('/cluster', getCluster, (req, res) => {
+app.post('/clusterAll', getCluster, (req, res) => {
     const results = res.locals.results
     res.send({results});
 })

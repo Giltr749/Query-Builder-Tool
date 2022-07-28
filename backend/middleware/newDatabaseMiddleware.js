@@ -73,19 +73,24 @@ export const insertData = async (req, res, next) => {
 
 export const getDataPython = async (req, res, next) => {
     console.log('getting data from database');
-    const concatQuery = req.body.queries.join(' OR ')
-    let query = '';
-    let headers = '';
-    if (req.body.queries.type === 'wifi') {
-        query = `SELECT * FROM wifiEvents WHERE ${concatQuery}`;
-        headers = Object.values(indexes['wifi']).join(',');
+    let wifiQuery = '';
+    let bleQuery = '';
+    let wifiKeys = '';
+    let bleKeys = '';
+    if (req.body.wifiQuery.length > 0) {
+        const wifiConcatQuery = req.body.wifiQuery.join(' OR ');
+        wifiQuery = `SELECT * FROM wifiEvents WHERE ${wifiConcatQuery}`;
+        wifiKeys = Object.values(indexes['wifi']).join(',');
+        console.log(wifiKeys);
     }
-    else {
-        query = `SELECT * FROM btEvents WHERE ${concatQuery}`;
-        headers = Object.values(indexes['bluetooth']).join(',');
+    if (req.body.bleQuery.length > 0) {
+        const bleConcatQuery = req.body.bleQuery.join(' OR ');
+        bleQuery = `SELECT * FROM btEvents WHERE ${bleConcatQuery}`;
+        bleKeys = Object.values(indexes['bluetooth']).join(',');
+        console.log(bleKeys);
     }
-    console.log('query:', query);
-    const pythonProcess = spawn('python3', ['middleware/getData.py', query, headers]);
+    // console.log('query:', query);
+    const pythonProcess = spawn('python3', ['middleware/getData.py', wifiQuery, bleQuery, wifiKeys, bleKeys]);
     console.log('creating report');
     pythonProcess.stdout.on('data', data => {
         console.log(data.toString());

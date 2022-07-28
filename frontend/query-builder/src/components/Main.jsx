@@ -9,10 +9,18 @@ import SecondSearch from './SecondSearch.jsx';
 
 function Main(props) {
 
-    const [query, setQuery] = useState({
-        queries: [],
-        type: 'wifi'
-    });
+    // const [query, setQuery] = useState(
+    //     // {
+    //     //     queries: [],
+    //     //     type: 'wifi'
+    //     // }
+    //     {
+    //         wifi: [],
+    //         ble: []
+    //     }
+    // );
+    const [wifiQuery, setWifiQuery] = useState([]);
+    const [bleQuery, setBleQuery] = useState([]);
     const [subQuery, setSubQuery] = useState('');
     const [cluster, setCluster] = useState('');
     const [sensor, setSensor] = useState('');
@@ -23,33 +31,16 @@ function Main(props) {
     const [loading, setLoading] = useState(false);
     const [second, setSecond] = useState(false);
 
-    const clickSubmit = async () => {
-        setLoading(true);
-        const start = new Date(startDate).getTime();
-        const end = new Date(endDate).getTime();
-        const numOfRows = (end - start) / 3600000;
-        const rows = [];
-        for (let i = 0; i < numOfRows; i++) {
-            rows[i] = new Date(start + i * 3600000 - 10800000)
-                .toISOString()
-                .substring(0, 13)
-                .replaceAll('-', '/')
-                .replaceAll('T', '/')
-                .replaceAll('/0', '/')
-            rows[i] = `${cluster}/${sensor}/${rows[i]}`
-        }
-        console.log(query);
-        await submit(rows)
-        setLoading(false);
-    }
 
-    const submit = async (rows) => {
-        const fileString = rows.join('.zip,') + '.zip';
+    const submitSensor = async (fileString, wifiQuery = null, bleQuery = null) => {
         console.log('downloading...');
         const response = await axios({
             method: 'post',
-            url: `http://localhost:8080/download/?fileKey=${fileString}`,
-            data: query,
+            url: `http://localhost:8080/sensor/?fileKey=${fileString}`,
+            data: {
+                wifiQuery: wifiQuery,
+                bleQuery: bleQuery
+            },
             responseType: 'blob'
         });
         if (response.data) {
@@ -57,21 +48,75 @@ function Main(props) {
         }
     }
 
-    const clickAdd = () => {
-        if (subQuery.length != 0) {
-            const tempQuery = structuredClone(query);
-            tempQuery.queries.push(subQuery);
-            setQuery(tempQuery);
+    const submitCluster = async (fileString, wifiQuery = null, bleQuery = null) => {
+        console.log('getting rows...');
+        const response = await axios({
+            method: 'post',
+            url: `http://localhost:8080/cluster`,
+            data: {
+                fileString: fileString,
+                cluster: cluster,
+                wifiQuery: wifiQuery,
+                bleQuery: bleQuery
+            },
+            responseType: 'blob'
+        });
+    }
+
+    const clickSubmit = async () => {
+        if (startDate.length == 0 || endDate.length == 0 || cluster.length == 0) {
+            console.log('invalid input');
+        }
+        else {
+            setLoading(true);
+            const start = new Date(startDate).getTime();
+            const end = new Date(endDate).getTime();
+            const numOfRows = (end - start) / 3600000;
+            const rows = [];
+            for (let i = 0; i < numOfRows; i++) {
+                rows[i] = new Date(start + i * 3600000 - 10800000)
+                    .toISOString()
+                    .substring(0, 13)
+                    .replaceAll('-', '/')
+                    .replaceAll('T', '/')
+                    .replaceAll('/0', '/')
+                if (sensor.length > 0) {
+                    rows[i] = `${cluster}/${sensor}/${rows[i]}`
+                }
+            }
+            if (sensor.length > 0) {
+                const fileString = rows.join('.zip,') + '.zip';
+                if (wifiQuery.length > 0 || bleQuery.length > 0) {
+                    submitSensor(fileString, wifiQuery, bleQuery);
+                }
+                else {
+                    submitSensor(fileString);
+                }
+            }
+            else {
+                const fileString = rows;
+                if (wifiQuery.length > 0 || bleQuery.length > 0) {
+                    submitCluster(fileString, wifiQuery, bleQuery);
+                }
+                else {
+                    submitCluster(fileString);
+                }
+            }
+            setLoading(false);
         }
     }
 
+
     return (
         <div className='main-div'>
-            <FirstSearch startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} cluster={cluster} setCluster={setCluster} sensor={sensor} setSensor={setSensor} results={results} setResults={setResults} setSecond={setSecond}/>
-            {
-                second > 0 &&
-                <SecondSearch query={query} setQuery={setQuery} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} clickAdd={clickAdd} clickSubmit={clickSubmit}/>
-            }
+            <FirstSearch startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} cluster={cluster} setCluster={setCluster} sensor={sensor} setSensor={setSensor} results={results} setResults={setResults} setSecond={setSecond} />
+            <div>
+                <label>WiFi</label>
+                <SecondSearch type={'wifi'} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} wifiQuery={wifiQuery} setWifiQuery={setWifiQuery} bleQuery={bleQuery} setBleQuery={setBleQuery} />
+                <label>BLE</label>
+                <SecondSearch type={'ble'} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} wifiQuery={wifiQuery} setWifiQuery={setWifiQuery} bleQuery={bleQuery} setBleQuery={setBleQuery} />
+            </div>
+            <button onClick={clickSubmit}>Submit</button>
         </div>
     );
 }

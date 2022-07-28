@@ -64,7 +64,7 @@ function FirstSearch({ startDate, setStartDate, endDate, setEndDate, cluster, se
 
     const submitCluster = async (cluster, rows) => {
         console.log('getting rows...');
-        const response = await axios.post(`http://localhost:8080/cluster`, {
+        const response = await axios.post(`http://localhost:8080/clusterAll`, {
             cluster: cluster,
             files: rows
         });
