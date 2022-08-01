@@ -36,17 +36,17 @@ def getData(wifiQuery, bleQuery, wifiHeaders, bleHeaders):
 
     if (len(wifiQuery) == 0 and len(bleQuery) == 0):
         rows.append(wifiHeaders.split(','))
-        wifiCurs.execute('SELECT * FROM wifi')
+        wifiCurs.execute('SELECT * FROM wifiEvents')
         rows.extend(wifiCurs.fetchall())
         rows.append(bleHeaders.split(','))
-        bleCurs.execute('SELECT * FROM ble')
+        bleCurs.execute('SELECT * FROM btEvents')
         rows.append(bleCurs.fetchall())
     return rows
 
 
 # create csv from array of strings
 def createCsv(array, filename):
-    with open(filename, 'w') as out:
+    with open(filename, 'w+') as out:
         csv_out = csv.writer(out)
         for row in array:
             csv_out.writerow(row)

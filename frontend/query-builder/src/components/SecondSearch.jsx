@@ -22,7 +22,7 @@ function SecondSearch({ type, subQuery, setSubQuery, wifi, setWifi, wifiQuery, s
     return (
         <div className='querybuilder-div'>
             <QueryBuilder type={type} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} wifiQuery={wifiQuery} setWifiQuery={setWifiQuery} bleQuery={bleQuery} setBleQuery={setBleQuery} />
-            <button onClick={clickAdd}>Add</button>
+            <button className='button' onClick={clickAdd}>Add</button>
             {
                 type === 'wifi' 
                 ? wifiQuery.map((item, index) => (

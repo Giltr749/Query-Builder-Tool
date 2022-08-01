@@ -9,16 +9,6 @@ import SecondSearch from './SecondSearch.jsx';
 
 function Main(props) {
 
-    // const [query, setQuery] = useState(
-    //     // {
-    //     //     queries: [],
-    //     //     type: 'wifi'
-    //     // }
-    //     {
-    //         wifi: [],
-    //         ble: []
-    //     }
-    // );
     const [wifiQuery, setWifiQuery] = useState([]);
     const [bleQuery, setBleQuery] = useState([]);
     const [subQuery, setSubQuery] = useState('');
@@ -32,14 +22,14 @@ function Main(props) {
     const [second, setSecond] = useState(false);
 
 
-    const submitSensor = async (fileString, wifiQuery = null, bleQuery = null) => {
+    const submitSensor = async (fileString, wifi = [], ble = []) => {
         console.log('downloading...');
         const response = await axios({
             method: 'post',
             url: `http://localhost:8080/sensor/?fileKey=${fileString}`,
             data: {
-                wifiQuery: wifiQuery,
-                bleQuery: bleQuery
+                wifiQuery: wifi,
+                bleQuery: ble
             },
             responseType: 'blob'
         });
@@ -48,7 +38,7 @@ function Main(props) {
         }
     }
 
-    const submitCluster = async (fileString, wifiQuery = null, bleQuery = null) => {
+    const submitCluster = async (fileString, wifi = [], ble = []) => {
         console.log('getting rows...');
         const response = await axios({
             method: 'post',
@@ -56,11 +46,14 @@ function Main(props) {
             data: {
                 fileString: fileString,
                 cluster: cluster,
-                wifiQuery: wifiQuery,
-                bleQuery: bleQuery
+                wifiQuery: wifi,
+                bleQuery: ble
             },
             responseType: 'blob'
         });
+        if (response.data) {
+            FileDownload(response.data, 'report.csv');
+        }
     }
 
     const clickSubmit = async () => {
@@ -95,6 +88,8 @@ function Main(props) {
             }
             else {
                 const fileString = rows;
+                console.log('rows');
+                console.log(fileString);
                 if (wifiQuery.length > 0 || bleQuery.length > 0) {
                     submitCluster(fileString, wifiQuery, bleQuery);
                 }
@@ -116,7 +111,7 @@ function Main(props) {
                 <label>BLE</label>
                 <SecondSearch type={'ble'} subQuery={subQuery} setSubQuery={setSubQuery} wifi={wifi} setWifi={setWifi} wifiQuery={wifiQuery} setWifiQuery={setWifiQuery} bleQuery={bleQuery} setBleQuery={setBleQuery} />
             </div>
-            <button onClick={clickSubmit}>Submit</button>
+            <button className='button' onClick={clickSubmit}>Submit</button>
         </div>
     );
 }

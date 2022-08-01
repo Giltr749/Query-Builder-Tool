@@ -56,7 +56,7 @@ function FirstSearch({ startDate, setStartDate, endDate, setEndDate, cluster, se
 
     const submitSensor = async (fileString) => {
         console.log('getting rows...');
-        const response = await axios.get(`http://localhost:8080/rows/?fileKey=${fileString}`);
+        const response = await axios.get(`http://localhost:8080/sensorrows/?fileKey=${fileString}`);
         console.log(response.data);
         setResults(response.data.rows);
 
@@ -64,10 +64,12 @@ function FirstSearch({ startDate, setStartDate, endDate, setEndDate, cluster, se
 
     const submitCluster = async (cluster, rows) => {
         console.log('getting rows...');
-        const response = await axios.post(`http://localhost:8080/clusterAll`, {
+        const response = await axios.post(`http://localhost:8080/clusterrows`, {
             cluster: cluster,
             files: rows
         });
+        console.log(response.data);
+        setResults(response.data.rows);
     }
 
     const toBuild = () => {
@@ -104,10 +106,10 @@ function FirstSearch({ startDate, setStartDate, endDate, setEndDate, cluster, se
                 results > 0 &&
                 <>
                     <div>{`Found ${results} rows`}</div>
-                    <button onClick={toBuild}>Build a query</button>
+                    <button className='button' onClick={toBuild}>Build a query</button>
                 </>
             }
-            <button onClick={clickSearch}>Search</button>
+            <button className='button' onClick={clickSearch}>Search</button>
         </div>
     );
 }

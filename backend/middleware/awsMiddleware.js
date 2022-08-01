@@ -25,7 +25,6 @@ export const getS3File = async (req, res, next) => {
         const downloaded = fs.readdirSync('./files/downloads')
         for await (let key of fileKeys) {
             if (!downloaded.includes(key.replaceAll('/', '_'))) {
-                console.log('included');
                 const options = {
                     Bucket: process.env.BUCKET,
                     Key: key
@@ -50,6 +49,9 @@ export const getS3File = async (req, res, next) => {
                     continue
                 }
             }
+            else {
+                console.log(key, 'already downloaded');
+            }
 
         }
     } catch (err) {
@@ -60,7 +62,8 @@ export const getS3File = async (req, res, next) => {
 
 export const getCluster = async (req, res, next) => {
     try {
-        const files = req.body.files;
+        res.locals.exists = true;
+        const files = req.body.fileString;
         const cluster = req.body.cluster;
         console.log(cluster);
         console.log(files);
@@ -103,6 +106,7 @@ export const getCluster = async (req, res, next) => {
                         })
                     })  
             }
+            console.log(file, 'already downloaded');
         }
 
     }

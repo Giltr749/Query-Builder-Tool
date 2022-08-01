@@ -20,7 +20,13 @@ app.post('/sensor', createTables, getS3File, unzipFiles, sortCsv, insertData, ge
         : res.send('Files do not exist')
 })
 
-app.get('/rows', getS3File, unzipFiles, countRows, (req, res) => {
+app.post('/cluster', createTables, getCluster, unzipFiles, sortCsv, insertData, getDataPython, (req, res) => {
+    res.locals.exists == true
+        ? res.download(`./files/toSend/report.csv`)
+        : res.send('Files do not exist')
+})
+
+app.get('/sensorrows', getS3File, unzipFiles, countRows, (req, res) => {
     const rows = res.locals.rows;
     console.log(rows, ' rows');
     res.send({
@@ -28,9 +34,11 @@ app.get('/rows', getS3File, unzipFiles, countRows, (req, res) => {
     })
 })
 
-app.post('/clusterAll', getCluster, (req, res) => {
-    const results = res.locals.results
-    res.send({results});
+app.post('/clusterrows', getCluster, unzipFiles, countRows, (req, res) => {
+    const rows = res.locals.rows
+    res.send({
+        "rows": rows
+    });
 })
 
 app.listen(process.env.PORT, () => {
