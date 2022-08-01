@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
-import { getS3File, getCluster } from './middleware/awsMiddleware.js';
-import { unzipFiles } from './middleware/unzipMiddleware.js';
-import { countRows, sortCsv } from './middleware/parseMiddleware.js';
-import { createTables, insertData, getData, getDataPython } from './middleware/newDatabaseMiddleware.js';
+import { getS3File, getCluster } from './src/middleware/functionality/awsMiddleware.js';
+import { unzipFiles } from './src/middleware/functionality/unzipMiddleware.js';
+import { countRows, sortCsv } from './src/middleware/functionality/parseMiddleware.js';
+import { createTables, insertData, getData, getDataPython } from './src/middleware/functionality/newDatabaseMiddleware.js';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import fs from 'fs';
