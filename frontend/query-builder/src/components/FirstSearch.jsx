@@ -56,17 +56,17 @@ function FirstSearch({ startDate, setStartDate, endDate, setEndDate, cluster, se
 
     const submitSensor = async (fileString) => {
         console.log('getting rows...');
-        const response = await axios.get(`http://localhost:8080/sensorrows/?fileKey=${fileString}`);
+        const response = await axios.get(`http://localhost:8080/app/sensorrows/?fileKey=${fileString}`);
         console.log(response.data);
         setResults(response.data.rows);
 
     }
 
     const submitCluster = async (cluster, rows) => {
-        console.log('getting rows...');
-        const response = await axios.post(`http://localhost:8080/clusterrows`, {
+        console.log('getting rows...', rows);
+        const response = await axios.post(`http://localhost:8080/app/clusterrows`, {
             cluster: cluster,
-            files: rows
+            fileString: rows
         });
         console.log(response.data);
         setResults(response.data.rows);

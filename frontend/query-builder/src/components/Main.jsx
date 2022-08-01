@@ -26,7 +26,7 @@ function Main(props) {
         console.log('downloading...');
         const response = await axios({
             method: 'post',
-            url: `http://localhost:8080/sensor/?fileKey=${fileString}`,
+            url: `http://localhost:8080/app/sensor/?fileKey=${fileString}`,
             data: {
                 wifiQuery: wifi,
                 bleQuery: ble
@@ -42,7 +42,7 @@ function Main(props) {
         console.log('getting rows...');
         const response = await axios({
             method: 'post',
-            url: `http://localhost:8080/cluster`,
+            url: `http://localhost:8080/app/cluster`,
             data: {
                 fileString: fileString,
                 cluster: cluster,
