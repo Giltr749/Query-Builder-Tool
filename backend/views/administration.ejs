@@ -1,0 +1,211 @@
+<link rel="stylesheet" href="stylesheets/styles.css">
+
+<div class="flex-center">
+    <div class="container-admin">
+        <h2>Administration</h2>
+        <div>Pending users:</div>
+        <% if(pendingUsers.length !== 0){%>
+        <ul>
+            <table>
+                <tr>
+                    <th>User-Id</th>
+                    <th>E-Mail</th>
+                    <th>Role</th>
+                    <th>Permissions</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                <% } else {%>
+                <div>There are no users waiting for approval.</div>
+                <br>
+                <% } %>
+                <%for (let user of pendingUsers){%>
+                <tr>
+                    <form action="/administration" method="POST">
+                        <td>
+                            <input class="text-input" name="user_id" id="user_id" value=<%=user.user_id%> readonly />
+                        </td>
+                        <td>
+                            <input class="text-input table-margin" name="email" id="email" value=<%=user.email%>
+                                readonly />
+                        </td>
+                        <td>
+                            <select name="role" id="role">
+                                <option selected hidden value=<%=user.role_id%>><%=user.role_name%></option>
+                                <%for (let role of roles){%>
+                                <option value=<%=role.role_id%>><%=role.role_name%>
+                                </option>
+                                <% } %>
+                            </select>
+                        </td>
+                        <td>
+                            <%if(user.role_id){ %>
+                            <div>
+                                Full Permissions
+                            </div>
+                            <% } else {%>
+                            <div class="flex-sb">
+                                <div class="permissions">
+                                    <%for (let permission of permissions){%>
+                                    <div class="permission-item">
+                                        <%if(permission.permission_name in user.permissions){ %>
+                                        <input type="checkbox" checked id=<%=permission.permission_id%>
+                                            name=<%=permission.permission_name%> value=<%=permission.permission_id%>>
+                                        <label class="permission-item">
+                                            <%=permission.permission_name%></label><br>
+                                        <% } else {%>
+                                        <input type="checkbox" id=<%=permission.permission_id%>
+                                            name=<%=permission.permission_name%> value=<%=permission.permission_id%>>
+                                        <label class="permission-item">
+                                            <%=permission.permission_name%></label><br>
+                                        <% } %>
+                                    </div>
+                                    <% } %>
+                                    <div class="flex-start" style="max-width: 200px;">
+                                        <input class="button button-margin" type="submit" name="grantFullPermissions"
+                                            value="Full Permissions">
+                                        <input class="button button-margin" style="margin: 5px" type="submit"
+                                            name="resetPermissions" value="Reset Permissions">
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
+                        </td>
+                        <td>
+                            <div class="button-margin">
+                                <button class="button" type="submit" name="approveUser" value="1">Approve</button>
+                            </div>
+                            <div class="button-margin">
+                                <button class="button" type="submit" name="status" value="2">Decline</button>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                <%}%>
+        </table>
+    </ul>
+    <div>Active users:</div>
+    <% if(approvedUsers.length !== 0){%>
+                <ul>
+                    <table>
+                        <tr>
+                            <th>User-Id</th>
+                            <th>E-Mail</th>
+                            <th>Role</th>
+                            <th>Permissions</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <% } else {%>
+                        <div>There are no active users.</div>
+                        <br>
+                        <% } %>
+                        <%for (let user of approvedUsers){%>
+                        <tr>
+                            <form action="/administration" method="POST">
+                                <td>
+                                    <input class="text-input" name="user_id" id="user_id" value=<%=user.user_id%>
+                                        readonly />
+                                </td>
+                                <td>
+                                    <input class="text-input table-margin" name="email" id="email" value=<%=user.email%>
+                                        readonly />
+                                </td>
+                                <td>
+                                    <select name="role" id="role">
+                                        <option selected hidden value=<%=user.role_id%>><%=user.role_name%></option>
+                                        <%for (let role of roles){%>
+                                        <option value=<%=role.role_id%>><%=role.role_name%>
+                                        </option>
+                                        <% } %>
+                                    </select>
+                                    <button class="button table-margin" type="submit" name="changeRole" value="1">
+                                        Change Role</button>
+                                </td>
+                                <td>
+                                    <div class="permissions">
+                                        <%if(user.role_id){ %>
+                                        <div>
+                                            Full Permissions
+                                        </div>
+                                        <% } else {%>
+                                        <div class="flex-sb">
+                                            <div class="permission-item">
+                                                <%for (let permission of permissions){%>
+                                                <%if(permission.permission_name in user.permissions){ %>
+                                                <input type="checkbox" checked id=<%=permission.permission_id%>
+                                                    name=<%=permission.permission_name%>
+                                                    value=<%=permission.permission_id%>>
+                                                <label class="permission-item">
+                                                    <%=permission.permission_name%></label><br>
+                                                <% } else {%>
+                                                <input type="checkbox" id=<%=permission.permission_id%>
+                                                    name=<%=permission.permission_name%>
+                                                    value=<%=permission.permission_id%>>
+                                                <label class="permission-item">
+                                                    <%=permission.permission_name%></label><br>
+                                                <% } %>
+                                                <% } %>
+                                            </div>
+                                            <div style="max-width: 200px;">
+                                                <input class="button button-margin" type="submit"
+                                                    name="changePermission" value="Change to Selected">
+                                                <input class="button button-margin" type="submit"
+                                                    name="grantFullPermissions" value="Grant Full Permissions">
+                                                <input class="button button-margin" type="submit"
+                                                    name="resetPermissions" value="Reset Permissions">
+                                            </div>
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="button" type="submit" name="status" value="2">Revoke
+                                        Access</button>
+                                </td>
+                            </form>
+                        </tr>
+                        <%}%>
+        </table>
+    </ul>
+    <div>Declined/Inactive users:</div>
+    <% if(inactiveUsers.length !== 0){%>
+                        <ul>
+                            <table>
+                                <tr>
+                                    <th>User-Id</th>
+                                    <th>E-Mail</th>
+                                    <th></th>
+                                </tr>
+                                <% } else {%>
+                                <div>There are no inactive users.</div>
+                                <br>
+                                <% } %>
+                                <%for (let user of inactiveUsers){%>
+                                <tr>
+                                    <form action="/administration" method="POST">
+                                        <td>
+                                            <input class="text-input" name="user_id" id="user_id"
+                                                value=<%=user.user_id%> readonly />
+                                        </td>
+                                        <td>
+                                            <input class="text-input" name="email" id="email" value=<%=user.email%>
+                                                readonly />
+                                        </td>
+                                        <td>
+                                            <button class="button" type="submit" name="status"
+                                                value="1">Reactivate</button>
+                                        </td>
+                                    </form>
+                                </tr>
+                                <%}%>
+        </table>
+    </ul>
+    <form action="/app" method="GET">
+        <button class="button" type="submit">Return to App</button>
+    </form>
+    <form action="/logout" method="POST">
+        <button class="button" type="submit">Log Out</button>
+    </form>
+</div>
+</div>

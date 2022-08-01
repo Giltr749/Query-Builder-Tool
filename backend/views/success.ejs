@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="stylesheets/styles.css">
+<div class="flex-center">
+    <div class="container"> You've been successfully registered.
+        Please wait for AD Knight to approve your registration.
+
+        Please scan the following QR-Code to register with Google Authenticator:
+        <div class="qrcode">
+            <%- google_auth.qr %>
+        </div>
+        <br />
+        Secret:
+        <%= google_auth.secret %>
+    </div>
+</div>

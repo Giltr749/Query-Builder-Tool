@@ -1,0 +1,75 @@
+<script src="https://www.google.com/recaptcha/api.js?render=6LcWH_kgAAAAAKi5khM0upbLOUE0jsD83tB0Q49o"></script>
+<link rel="stylesheet" href="stylesheets/styles.css">
+
+<script>
+    grecaptcha.ready(function () {
+        // do request for recaptcha token
+        // response is promise with passed token
+        grecaptcha.execute('6LcWH_kgAAAAAKi5khM0upbLOUE0jsD83tB0Q49o', { action: 'validate_captcha' })
+            .then(function (token) {
+                // add token value to form
+                document.getElementById('g-recaptcha-response').value = token;
+            });
+    });
+</script>
+
+<div class="flex-center">
+    <div class="container">
+        <h2 class="flex-center apptitle-heading">APP TITLE</h2>
+        <div class="flex-center">
+
+            <table>
+                <tr>
+                    <th>
+                        <h2 style="margin: 0; display: flex; justify-content: start;">Register</h2>
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="error">
+                            <% if (message) { %>
+                            <%= message %>
+                            <% } %>
+                        </div>
+                        <form action="/register" method="POST">
+                            <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                            <input type="hidden" name="action" value="validate_captcha">
+                            <div class="flex-sb">
+                                <label for="email">E-Mail:</label>
+                                <input class="text-input" type="email" id="email" name="email" required>
+                            </div>
+                            <div class="flex-sb">
+                                <label for="password">Password:</label>
+                                <input class="text-input" type="password" id="password" name="password" required>
+                            </div>
+                            <div class="flex-sb">
+                                <label for="password">Confirm password:</label>
+                                <input class="text-input" type="password" id="password_conf" name="password_conf"
+                                    required>
+                            </div>
+                            <button class="button" type="submit">Register</button>
+                        </form>
+                        <br />
+                        <a href="/login/google" class="button"
+                            style="text-decoration: none; display: flex; justify-content: start; align-items: center;">
+                            <div class="flex-start">
+                                <img src="https://static.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google Logo"
+                                    class="logo">
+                                Login with Google
+                            </div>
+                        </a>
+                        <br>
+                        <a href="/login" class="button"
+                            style="text-decoration: none; display: flex; justify-content: start; align-items: center;">
+                            <div class="flex-start">
+                                <img src="images/ADKfavicon.png" alt="ADK Logo" class="logo">
+                                Login with AD Knight
+                            </div>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <img src="images/ADKfavicon.png" alt="ADK Logo" class="main-logo">
+        </div>
+    </div>
+</div>
